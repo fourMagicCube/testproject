@@ -2,8 +2,12 @@ package com.harts;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
+import com.harts.utils.CityUtils;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,13 +22,27 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class App {
     public static void main(String[] args) {
-        Workbook workbook = App.readExcel("/home/harts/Documents/2020年运费汇总.xlsx");
-        Sheet sheet = workbook.getSheetAt(0);
-        Row row = sheet.getRow(8);
-        Cell cell = row.getCell(11);
-        System.out.println(getCellFormatValue(cell));
+        Workbook workbook = App.readExcel("/home/harts/Documents/运费汇总分析.xlsx");
+        Sheet sheet = workbook.getSheetAt(1);
+        int count = 274;
+        Row row = null;
+        Cell cell = null;
+        XSSFWorkbook cityWorkbook = new XSSFWorkbook();
+        Sheet sheet2 = cityWorkbook.createSheet();
+        String cellstring = null;
+        for (int i = 2; i < count; i++) {
+            row = sheet.getRow(i);
+            cell = row.getCell(12);
+            cellstring = getCellFormatValue(cell);
+            sheet2.createRow(i)
+                    .createCell(0)
+                    .setCellValue(CityUtils.findObjectProvince(cellstring)+cellstring+"市");
 
-        System.out.println("aaa");
+        }
+        writeExcel("/home/harts/Documents/test.xlsx", cityWorkbook);
+        // System.out.println(getCellFormatValue(cell));
+
+        // System.out.println(CityUtils.findObjectProvince("武汉"));
     }
 
     public static Workbook readExcel(String fileName) {
@@ -49,6 +67,18 @@ public class App {
             e.printStackTrace();
         }
         return wb;
+    }
+
+    public static void writeExcel(String fileName, XSSFWorkbook cityWorkbook) {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(fileName);
+            cityWorkbook.write(os);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
